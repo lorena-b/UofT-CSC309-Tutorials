@@ -19,8 +19,24 @@ $(document).ready(function() {
 
       // TODO: Construct and return a <div> block that represent "flex-item" like a 
       // sample in the main.html using all given arguments.
-      return 
-  }
+      let divBlock = `<div id="container-flex" class="container-flex">
+      <div id=${itemId} class="flex-item item-description">
+        <img src=${itemImageUrl}>
+        <div class="item-title">
+          <a href=${itemUrl} target="_blank">
+            ${itemTitle}
+          </a>
+        </div>
+        <div class="source">From: ${itemNewsSite}</div>
+        <div class="item-update-at">
+          <span class="badge badge-info">${itemUpdateDate}</span>
+        </div>
+        <div class="item-summary">
+          ${itemSummary}
+        </div>
+      </div>`
+      return divBlock;
+  };
 
   // This function retrieve information using Ajax. Upon a successful call, it calls 
   // "displayItem" functions and provides appropriate data as arguments, then
@@ -31,7 +47,7 @@ $(document).ready(function() {
     // pageSize: is the number of items you would like to display when 
     //    user clicks on the "Load More!" button
  
-    let requestUrl = "https://api.spaceflightnewsapi.net/v3/blogs?_limit="+pageSize+"&_start="+itemNumber
+    let requestUrl = "https://api.spaceflightnewsapi.net/v3/blogs?_limit="+pageSize+"&_start="+itemNumber;
     
     /* TODO: 
         1. Write Ajax to retrieve product information. 
@@ -44,19 +60,43 @@ $(document).ready(function() {
         5. If the call to the API fails, put an appropriate message into the 
           "#alert-box" entity and make it visible.
     */
-    
-  }
+   let container = document.getElementById("container-flex"); 
+   let alertBox = document.getElementById('alert-box');
+   let req =  $.ajax({
+      url: requestUrl,
+      type: "GET",
+      dataType: "json"
+    });
+    req.done((res) => {
+      alertBox.hidden = true; 
+      for (resp of res) {
+        container.innerHTML += displayItem(resp.id, resp.title, resp.updatedAt, resp.newsSite, resp.url,
+          resp.imageUrl, resp.summary);
+      }
+  });
+  req.fail((res) => {
+    alertBox.hidden = true; 
+    alertBox.innerHTML = res.status; 
+  });
 
-
+  };
   /* TODO: 
       1. Make sure when you click on "Load more!" button, it loads 5 more items. 
       2. Make sure scroll bar does not jump to the top of the page! Take a look at built-in "preventDefault" function.
       3. Change the default text of the button from "Load some news" to "Load More!".
       4. Call "loadItems" function with appropriate arguments. What would be a correct value for "itemNumber" argument?
       */
+     let index = 0;
+     let loadMore = document.getElementById('load-more');
+     loadMore.innerHTML = 'Load More!';
+     loadMore.onclick = function(event){
+      event.preventDefault();
+        loadItems(index, 5); 
+        index += 5;
+     };
   
-
-});
+    
+    });
 
 
 
@@ -100,6 +140,4 @@ for(let item of items){
     event.target.style.border = "0.1rem solid gray";
   }, false);
 }
-
-
 
